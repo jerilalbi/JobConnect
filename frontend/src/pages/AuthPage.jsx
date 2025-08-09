@@ -16,9 +16,11 @@ import {
     FormControl,
     FormLabel,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { Error, CheckCircle } from "@mui/icons-material";
 
 function AuthPage() {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("login");
     const [loginForm, setLoginForm] = useState({ email: "", password: "" });
     const [signupForm, setSignupForm] = useState({
@@ -44,14 +46,17 @@ function AuthPage() {
             loginForm.email === "admin@example.com" &&
             loginForm.password === "password"
         ) {
+
         } else if (
             loginForm.email === "employer@example.com" &&
             loginForm.password === "password"
         ) {
+
         } else if (
             loginForm.email === "jobseeker@example.com" &&
             loginForm.password === "password"
         ) {
+            navigate("/user-dashboard");
         } else {
             setError("Invalid email or password");
         }
@@ -118,7 +123,7 @@ function AuthPage() {
 
                 {activeTab === "login" && (
                     <Box component="form" onSubmit={handleLoginSubmit}>
-                        <CardContent sx={{ pt: 3, "& > *": { mb: 2 } }}>
+                        <CardContent sx={{ pt: 3, "& > *": { mb: 2.5 } }}>
                             {error && (
                                 <Alert severity="error" icon={<Error />}>
                                     {error}
