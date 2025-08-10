@@ -56,7 +56,7 @@ function AuthPage() {
             loginForm.email === "jobseeker@example.com" &&
             loginForm.password === "password"
         ) {
-            navigate("/user-dashboard");
+            navigate("/home");
         } else {
             setError("Invalid email or password");
         }

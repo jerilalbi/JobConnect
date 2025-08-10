@@ -6,31 +6,36 @@ import {
     AppBar,
     Toolbar,
 } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 
-function Header({ userRole }) {
+function Header({ userRole, isSearch = false }) {
+    const navigate = useNavigate();
     return (
         <AppBar position="static" color="default" elevation={1}>
             <Toolbar>
                 <Typography
                     variant="h5"
                     component="h1"
-                    sx={{ flexGrow: 1, fontWeight: "bold" }}
+                    onClick={() => { navigate('/') }}
+                    sx={{ flexGrow: 1, fontWeight: "bold", cursor: 'pointer' }}
                 >
                     JobConnect
                 </Typography>
 
-                {userRole === 'jobSeeker' && (
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: '#1976d2',
-                        color: 'white',
-                        padding: '10px 20px',
-                        borderRadius: '15px',
-                        marginRight: '15px',
-                        cursor: 'pointer'
-                    }}>
+                {(userRole === 'jobSeeker' && !isSearch) && (
+                    <Box
+                        onClick={() => { navigate('/search') }}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: '#1976d2',
+                            color: 'white',
+                            padding: '10px 20px',
+                            borderRadius: '15px',
+                            marginRight: '15px',
+                            cursor: 'pointer'
+                        }}>
                         <Typography>Search Jobs</Typography>
                     </Box>
                 )}
