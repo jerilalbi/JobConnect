@@ -83,6 +83,15 @@ export const getAllJobs = async (req, res) => {
     }
 }
 
+export const getAllJobsAdmin = async (req, res) => {
+    try {
+        const jobs = await Job.find().populate("postedBy", "name email");
+        res.json({ success: true, jobs });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
 export const approveJob = async (req, res) => {
     try {
         const job = await Job.findByIdAndUpdate(

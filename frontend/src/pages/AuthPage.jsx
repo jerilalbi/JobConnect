@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Error, CheckCircle } from "@mui/icons-material";
+import { loginUser, registerUser } from "../api/auth";
 
 function AuthPage() {
     const navigate = useNavigate();
@@ -28,12 +29,12 @@ function AuthPage() {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "jobSeeker",
+        role: "jobseeker",
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    const handleLoginSubmit = (e) => {
+    const handleLoginSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
@@ -42,55 +43,53 @@ function AuthPage() {
             return;
         }
 
-        if (
-            loginForm.email === "admin@example.com" &&
-            loginForm.password === "password"
-        ) {
-
-        } else if (
-            loginForm.email === "employer@example.com" &&
-            loginForm.password === "password"
-        ) {
-
-        } else if (
-            loginForm.email === "jobseeker@example.com" &&
-            loginForm.password === "password"
-        ) {
-            navigate("/home");
+        const res = await loginUser(loginForm);
+        if (res) {
+            localStorage.setItem("token", res.token);
+            localStorage.setItem("role", res.role);
+            localStorage.setItem("name", res.name);
+            navigate('home');
         } else {
-            setError("Invalid email or password");
+            setError('Invalid Email or Password')
         }
+
 
     };
 
-    const handleSignupSubmit = (e) => {
-        e.preventDefault();
-        setError("");
+    const handleSignupSubmit = async (e) => {
+        try {
+            e.preventDefault();
+            setError("");
 
-        if (
-            !signupForm.name ||
-            !signupForm.email ||
-            !signupForm.password ||
-            !signupForm.confirmPassword
-        ) {
-            setError("Please fill in all fields");
-            return;
+            if (
+                !signupForm.name ||
+                !signupForm.email ||
+                !signupForm.password ||
+                !signupForm.confirmPassword
+            ) {
+                setError("Please fill in all fields");
+                return;
+            }
+
+            if (signupForm.password !== signupForm.confirmPassword) {
+                setError("Passwords do not match");
+                return;
+            }
+
+            const result = await registerUser(signupForm);
+            if (result) {
+                setSuccess("Account created successfully! Please log in.");
+                setSignupForm({
+                    name: "",
+                    email: "",
+                    password: "",
+                    confirmPassword: "",
+                    role: "jobseeker",
+                });
+            }
+        } catch (error) {
+            setError(error.message);
         }
-
-        if (signupForm.password !== signupForm.confirmPassword) {
-            setError("Passwords do not match");
-            return;
-        }
-
-        setSuccess("Account created successfully! Please log in.");
-
-        setSignupForm({
-            name: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
-            role: "jobSeeker",
-        });
     };
 
     return (
@@ -180,7 +179,7 @@ function AuthPage() {
 
                 {activeTab === "signup" && (
                     <Box component="form" onSubmit={handleSignupSubmit}>
-                        <CardContent sx={{ pt: 3, "& > *": { mb: 2.5 } }}>
+                        <CardContent sx={{ pt: 3, "& > *": { mb: 2.6 } }}>
                             {error && (
                                 <Alert severity="error" icon={<Error />}>
                                     {error}
@@ -257,7 +256,7 @@ function AuthPage() {
                                     sx={{ mt: 1 }}
                                 >
                                     <FormControlLabel
-                                        value="jobSeeker"
+                                        value="jobseeker"
                                         control={<Radio />}
                                         label="Job Seeker"
                                     />

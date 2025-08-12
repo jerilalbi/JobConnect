@@ -49,9 +49,11 @@ import {
 } from "@mui/icons-material";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useEffect } from "react";
+import { createJob, deleteJob, editJob, showEmployerJobs } from "../api/jobs";
 
 function Home() {
-    const userRole = "employer";
+    const userRole = localStorage.getItem("role");
 
     const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
     const [jobFormDialogOpen, setJobFormDialogOpen] = useState(false);
@@ -110,120 +112,9 @@ function Home() {
         },
     ];
 
-    const [employerJobs, setEmployerJobs] = useState([
-        {
-            id: 1,
-            title: "Senior React Developer",
-            description: "We are looking for an experienced React developer...",
-            location: "San Francisco, CA",
-            salary: "$120,000 - $150,000",
-            jobType: "Full-Time",
-            applicants: 12,
-            active: true,
-            expiresAt: "2023-07-30",
-            applicantsList: [
-                {
-                    id: 1,
-                    name: "Alice Johnson",
-                    email: "alice@example.com",
-                    resume: "Alice_Resume.pdf",
-                    appliedDate: "2023-06-20",
-                },
-                {
-                    id: 2,
-                    name: "Bob Smith",
-                    email: "bob@example.com",
-                    resume: "Bob_Resume.pdf",
-                    appliedDate: "2023-06-18",
-                },
-                {
-                    id: 3,
-                    name: "Carol Davis",
-                    email: "carol@example.com",
-                    resume: "Carol_Resume.pdf",
-                    appliedDate: "2023-06-15",
-                },
-            ],
-        },
-        {
-            id: 2,
-            title: "UI/UX Designer",
-            description: "Creative designer needed for user experience projects...",
-            location: "New York, NY",
-            salary: "$90,000 - $120,000",
-            jobType: "Full-Time",
-            applicants: 8,
-            active: true,
-            expiresAt: "2023-07-25",
-            applicantsList: [
-                {
-                    id: 4,
-                    name: "David Wilson",
-                    email: "david@example.com",
-                    resume: "David_Resume.pdf",
-                    appliedDate: "2023-06-22",
-                },
-                {
-                    id: 5,
-                    name: "Eva Brown",
-                    email: "eva@example.com",
-                    resume: "Eva_Resume.pdf",
-                    appliedDate: "2023-06-19",
-                },
-            ],
-        },
-        {
-            id: 3,
-            title: "Project Manager",
-            description: "Experienced PM to lead cross-functional teams...",
-            location: "Remote",
-            salary: "$100,000 - $130,000",
-            jobType: "Full-Time",
-            applicants: 5,
-            active: false,
-            expiresAt: "2023-06-30",
-            applicantsList: [
-                {
-                    id: 6,
-                    name: "Frank Miller",
-                    email: "frank@example.com",
-                    resume: "Frank_Resume.pdf",
-                    appliedDate: "2023-06-10",
-                },
-            ],
-        },
-    ]);
+    const [employerJobs, setEmployerJobs] = useState([]);
 
-    const [adminJobListings, setAdminJobListings] = useState([
-        {
-            id: 1,
-            title: "Senior React Developer",
-            company: "Tech Solutions Inc.",
-            status: "Active",
-            postedDate: "2023-06-01",
-        },
-        {
-            id: 2,
-            title: "UI/UX Designer",
-            company: "Creative Minds",
-            status: "Active",
-            postedDate: "2023-06-05",
-        },
-        {
-            id: 3,
-            title: "Project Manager",
-            company: "Innovate Corp",
-            status: "Pending",
-            postedDate: "2023-06-10",
-        },
-        {
-            id: 4,
-            title: "Backend Developer",
-            company: "Data Systems",
-            status: "Inactive",
-            postedDate: "2023-05-15",
-        },
-    ]);
+    const [adminJobListings, setAdminJobListings] = useState([]);
 
     const adminUsers = [
         {
@@ -262,7 +153,7 @@ function Home() {
             location: job.location,
             salary: job.salary,
             jobType: job.jobType,
-            expirationDate: job.expiresAt,
+            expirationDate: new Date(job.expirationDate).toISOString().split('T')[0],
         });
         setJobFormDialogOpen(true);
     };
@@ -306,38 +197,32 @@ function Home() {
         );
     };
 
-    const handleSaveJob = () => {
+    const handleSaveJob = async () => {
         if (editingJob) {
+            const updatedJob = await editJob(jobForm, editingJob._id);
+
             setEmployerJobs((prev) =>
                 prev.map((job) =>
-                    job.id === editingJob.id ? { ...job, ...jobForm } : job,
+                    job._id === editingJob._id ? updatedJob.job : job,
                 ),
+
             );
         } else {
-            const newJob = {
-                id: Date.now(),
-                ...jobForm,
-                applicants: 0,
-                active: true,
-                expiresAt: jobForm.expirationDate,
-                applicantsList: [],
-            };
-            setEmployerJobs((prev) => [...prev, newJob]);
+            const newJob = await createJob(jobForm);
+            console.log(newJob.jobs)
+            setEmployerJobs((prev) => [...prev, newJob.job]);
         }
         setJobFormDialogOpen(false);
     };
 
-    const confirmDeleteJob = () => {
-        if (userRole === "employer") {
+    const confirmDeleteJob = async () => {
+        const isDelete = await deleteJob(selectedJob._id);
+        if (isDelete) {
             setEmployerJobs((prev) =>
-                prev.filter((job) => job.id !== selectedJob.id),
+                prev.filter((job) => job._id !== selectedJob._id),
             );
-        } else if (userRole === "admin") {
-            setAdminJobListings((prev) =>
-                prev.filter((job) => job.id !== selectedJob.id),
-            );
+            setDeleteDialogOpen(false);
         }
-        setDeleteDialogOpen(false);
     };
 
     const getStatusColor = (status) => {
@@ -357,11 +242,31 @@ function Home() {
         }
     };
 
+    useEffect(() => {
+        const getEmployerData = async () => {
+            const employerJobData = await showEmployerJobs();
+            setEmployerJobs(employerJobData.jobs)
+        }
+
+        const getAllJobsAdmin = async () => {
+            const employerJobData = await getAllJobsAdmin();
+            setAdminJobListings(employerJobData.jobs)
+        }
+
+        if (userRole === 'employer') {
+            getEmployerData();
+        }
+        if (userRole === 'admin') {
+            getAllJobsAdmin();
+        }
+
+    }, [])
+
     return (
         <Box sx={{ minHeight: "100vh", bgcolor: "grey.50" }}>
-            <Header userRole={'jobSeeker'} />
+            <Header userRole={userRole} />
             <Container maxWidth="xl" sx={{ mt: 2 }}>
-                {userRole === "jobSeeker" && (
+                {userRole === "jobseeker" && (
                     <Box>
                         <Grid container spacing={3} sx={{ mb: 3 }}>
                             <Grid item xs={12} md={4}>
@@ -480,24 +385,7 @@ function Home() {
                                     />
                                     <CardContent>
                                         <Typography variant="h3" fontWeight="bold">
-                                            {employerJobs.filter((job) => job.active).length}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Card>
-                                    <CardHeader
-                                        title="Total Applicants"
-                                        subheader="Across all job postings"
-                                    />
-                                    <CardContent>
-                                        <Typography variant="h3" fontWeight="bold">
-                                            {employerJobs.reduce(
-                                                (sum, job) => sum + job.applicants,
-                                                0,
-                                            )}
+                                            {employerJobs.filter((job) => job.status === 'approved').length}
                                         </Typography>
                                     </CardContent>
                                 </Card>
@@ -538,7 +426,6 @@ function Home() {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Job Title</TableCell>
-                                                <TableCell>Applicants</TableCell>
                                                 <TableCell>Status</TableCell>
                                                 <TableCell>Expires</TableCell>
                                                 <TableCell>Actions</TableCell>
@@ -546,24 +433,18 @@ function Home() {
                                         </TableHead>
                                         <TableBody>
                                             {employerJobs.map((job) => (
-                                                <TableRow key={job.id}>
+                                                <TableRow key={job._id}>
                                                     <TableCell sx={{ fontWeight: 500 }}>
                                                         {job.title}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Box display="flex" alignItems="center">
-                                                            <Users sx={{ mr: 1, color: "text.secondary" }} />
-                                                            {job.applicants}
-                                                        </Box>
-                                                    </TableCell>
-                                                    <TableCell>
                                                         <Chip
-                                                            label={job.active ? "Active" : "Inactive"}
-                                                            color={job.active ? "success" : "default"}
+                                                            label={job.status}
+                                                            color={job.status === "pending" ? "default" : job.status === "approved" ? 'success' : 'error'}
                                                             size="small"
                                                         />
                                                     </TableCell>
-                                                    <TableCell>{job.expiresAt}</TableCell>
+                                                    <TableCell>{new Date(job.expirationDate).toISOString().split('T')[0]}</TableCell>
                                                     <TableCell>
                                                         <Box display="flex" gap={1}>
                                                             <IconButton
@@ -670,154 +551,72 @@ function Home() {
                                 value={tabValue}
                                 onChange={(e, newValue) => setTabValue(newValue)}
                             >
-                                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                                    <Tab label="Job Listings" />
-                                    <Tab label="Users" />
+
+                                <Box sx={{ mt: 3 }}>
+                                    <Card>
+                                        <CardHeader
+                                            title="Job Listings"
+                                            subheader="Manage all job postings"
+                                        />
+                                        <CardContent>
+                                            <TableContainer>
+                                                <Table>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>Job Title</TableCell>
+                                                            <TableCell>Company</TableCell>
+                                                            <TableCell>Posted Date</TableCell>
+                                                            <TableCell>Status</TableCell>
+                                                            <TableCell>Actions</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {adminJobListings.map((job) => (
+                                                            <TableRow key={job.id}>
+                                                                <TableCell sx={{ fontWeight: 500 }}>
+                                                                    {job.title}
+                                                                </TableCell>
+                                                                <TableCell>{job.company}</TableCell>
+                                                                <TableCell>{job.postedDate}</TableCell>
+                                                                <TableCell>
+                                                                    <Chip
+                                                                        label={job.status}
+                                                                        color={getStatusColor(job.status)}
+                                                                        size="small"
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Box display="flex" gap={1}>
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            color="success"
+                                                                            onClick={() =>
+                                                                                handleApproveJob(job.id)
+                                                                            }
+                                                                            title="Approve Job"
+                                                                        >
+                                                                            <CheckCircle />
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            color="error"
+                                                                            onClick={() =>
+                                                                                handleRejectJob(job.id)
+                                                                            }
+                                                                            title="Deactivate Job"
+                                                                        >
+                                                                            <XCircle />
+                                                                        </IconButton>
+                                                                    </Box>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        </CardContent>
+                                    </Card>
                                 </Box>
-
-                                {tabValue === 0 && (
-                                    <Box sx={{ mt: 3 }}>
-                                        <Card>
-                                            <CardHeader
-                                                title="Job Listings"
-                                                subheader="Manage all job postings"
-                                            />
-                                            <CardContent>
-                                                <TableContainer>
-                                                    <Table>
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell>Job Title</TableCell>
-                                                                <TableCell>Company</TableCell>
-                                                                <TableCell>Posted Date</TableCell>
-                                                                <TableCell>Status</TableCell>
-                                                                <TableCell>Actions</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>
-                                                            {adminJobListings.map((job) => (
-                                                                <TableRow key={job.id}>
-                                                                    <TableCell sx={{ fontWeight: 500 }}>
-                                                                        {job.title}
-                                                                    </TableCell>
-                                                                    <TableCell>{job.company}</TableCell>
-                                                                    <TableCell>{job.postedDate}</TableCell>
-                                                                    <TableCell>
-                                                                        <Chip
-                                                                            label={job.status}
-                                                                            color={getStatusColor(job.status)}
-                                                                            size="small"
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell>
-                                                                        <Box display="flex" gap={1}>
-                                                                            <IconButton
-                                                                                size="small"
-                                                                                title="View Details"
-                                                                            >
-                                                                                <Eye />
-                                                                            </IconButton>
-                                                                            {job.status === "Pending" && (
-                                                                                <IconButton
-                                                                                    size="small"
-                                                                                    color="success"
-                                                                                    onClick={() =>
-                                                                                        handleApproveJob(job.id)
-                                                                                    }
-                                                                                    title="Approve Job"
-                                                                                >
-                                                                                    <CheckCircle />
-                                                                                </IconButton>
-                                                                            )}
-                                                                            {job.status === "Active" && (
-                                                                                <IconButton
-                                                                                    size="small"
-                                                                                    color="error"
-                                                                                    onClick={() =>
-                                                                                        handleRejectJob(job.id)
-                                                                                    }
-                                                                                    title="Deactivate Job"
-                                                                                >
-                                                                                    <XCircle />
-                                                                                </IconButton>
-                                                                            )}
-                                                                            <IconButton
-                                                                                size="small"
-                                                                                color="error"
-                                                                                onClick={() => handleDeleteJob(job)}
-                                                                                title="Delete Job"
-                                                                            >
-                                                                                <Trash2 />
-                                                                            </IconButton>
-                                                                        </Box>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            ))}
-                                                        </TableBody>
-                                                    </Table>
-                                                </TableContainer>
-                                            </CardContent>
-                                        </Card>
-                                    </Box>
-                                )}
-
-                                {tabValue === 1 && (
-                                    <Box sx={{ mt: 3 }}>
-                                        <Card>
-                                            <CardHeader
-                                                title="Users"
-                                                subheader="Manage registered users"
-                                            />
-                                            <CardContent>
-                                                <TableContainer>
-                                                    <Table>
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell>Name</TableCell>
-                                                                <TableCell>Email</TableCell>
-                                                                <TableCell>Role</TableCell>
-                                                                <TableCell>Status</TableCell>
-                                                                <TableCell>Actions</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>
-                                                            {adminUsers.map((user) => (
-                                                                <TableRow key={user.id}>
-                                                                    <TableCell sx={{ fontWeight: 500 }}>
-                                                                        {user.name}
-                                                                    </TableCell>
-                                                                    <TableCell>{user.email}</TableCell>
-                                                                    <TableCell>{user.role}</TableCell>
-                                                                    <TableCell>
-                                                                        <Chip
-                                                                            label={user.status}
-                                                                            color={getStatusColor(user.status)}
-                                                                            size="small"
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell>
-                                                                        <Box display="flex" gap={1}>
-                                                                            <IconButton size="small">
-                                                                                <Eye />
-                                                                            </IconButton>
-                                                                            <IconButton size="small">
-                                                                                {user.status === "Active" ? (
-                                                                                    <XCircle color="error" />
-                                                                                ) : (
-                                                                                    <CheckCircle color="success" />
-                                                                                )}
-                                                                            </IconButton>
-                                                                        </Box>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            ))}
-                                                        </TableBody>
-                                                    </Table>
-                                                </TableContainer>
-                                            </CardContent>
-                                        </Card>
-                                    </Box>
-                                )}
                             </Tabs>
                         </Box>
                     </Box>

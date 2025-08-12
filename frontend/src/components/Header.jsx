@@ -22,7 +22,7 @@ function Header({ userRole, isSearch = false }) {
                     JobConnect
                 </Typography>
 
-                {(userRole === 'jobSeeker' && !isSearch) && (
+                {(userRole === 'jobseeker' && !isSearch) && (
                     <Box
                         onClick={() => { navigate('/search') }}
                         sx={{
@@ -43,10 +43,10 @@ function Header({ userRole, isSearch = false }) {
                 <Box display="flex" alignItems="center" gap={2}>
                     <Box textAlign="right">
                         <Typography variant="body2" fontWeight="500">
-                            Jane Doe
+                            {localStorage.getItem("name") ?? ''}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                            {userRole === "jobSeeker"
+                            {userRole === "jobseeker"
                                 ? "Job Seeker"
                                 : userRole === "employer"
                                     ? "Employer"
@@ -54,10 +54,10 @@ function Header({ userRole, isSearch = false }) {
                         </Typography>
                     </Box>
                     <Avatar
-                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jane"
+                        src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80"
                         alt="User avatar"
                     >
-                        JD
+                        Name
                     </Avatar>
                 </Box>
             </Toolbar>

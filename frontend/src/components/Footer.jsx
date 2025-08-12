@@ -9,8 +9,10 @@ import {
 import {
     ExitToApp,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 function Footer() {
+    const navigate = useNavigate();
     return (
         <Paper component="footer" elevation={1} sx={{ mt: 4, py: 2 }}>
             <Container maxWidth="xl">
@@ -22,7 +24,10 @@ function Footer() {
                     <Typography variant="body2" color="text.secondary">
                         © 2025 JobConnect INC
                     </Typography>
-                    <Button variant="outlined" size="small" startIcon={<ExitToApp />}>
+                    <Button onClick={() => {
+                        localStorage.clear();
+                        navigate('/')
+                    }} variant="outlined" size="small" startIcon={<ExitToApp />}>
                         Logout
                     </Button>
                 </Box>

@@ -23,8 +23,10 @@ import {
 import JobCard from "../components/JobCard";
 import JobDetails from "../components/JobDetails";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 function JobSearch() {
+    const userRole = localStorage.getItem("role");
     const [jobs, setJobs] = useState([
         {
             id: 1,
@@ -175,7 +177,7 @@ function JobSearch() {
 
     return (
         <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-            <Header userRole={'jobSeeker'} isSearch={true} />
+            <Header userRole={userRole} isSearch={true} />
             <Container maxWidth="xl" sx={{ pt: 3 }}>
                 <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom>
                     Find Your Dream Job
@@ -316,6 +318,7 @@ function JobSearch() {
                     )}
                 </Box>
 
+
                 {sortedJobs.length > 0 && (
                     <Box display="flex" justifyContent="center" mt={4}>
                         <Pagination
@@ -327,6 +330,8 @@ function JobSearch() {
                         />
                     </Box>
                 )}
+
+                <Footer />
 
                 {selectedJob && (
                     <JobDetails
