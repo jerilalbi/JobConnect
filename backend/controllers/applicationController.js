@@ -93,3 +93,31 @@ export const showApplicants = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 }
+
+export const updateApplicationStatus = async (req, res) => {
+    try {
+        const { jobId, applicationId } = req.params;
+        const { status } = req.body;
+
+        const job = await Job.findOne({ _id: jobId, postedBy: req.user.id });
+
+        if (!job) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to change the status this job"
+            });
+        }
+
+        const application = await Application.findByIdAndUpdate(
+            applicationId,
+            { status: status },
+            { new: true }
+        )
+
+        if (!application) return res.status(400).json({ success: false, message: 'Application not found' });
+
+        res.json({ success: true, message: 'Application status updated', application })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
+    }
+}

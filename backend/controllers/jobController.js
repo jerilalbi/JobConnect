@@ -82,3 +82,39 @@ export const getAllJobs = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 }
+
+export const approveJob = async (req, res) => {
+    try {
+        const job = await Job.findByIdAndUpdate(
+            req.params.jobId,
+            { status: "approved" },
+            { new: true }
+        );
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: "Job not found" });
+        }
+
+        res.json({ success: true, message: "Job approved", job });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+export const disapproveJob = async (req, res) => {
+    try {
+        const job = await Job.findByIdAndUpdate(
+            req.params.jobId,
+            { status: "deactivated" },
+            { new: true }
+        );
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: "Job not found" });
+        }
+
+        res.json({ success: true, message: "Job deactivated", job });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
