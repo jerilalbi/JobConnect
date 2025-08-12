@@ -24,3 +24,61 @@ export const createJob = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+export const updateJob = async (req, res) => {
+    try {
+        const job = await Job.findById(req.params.id);
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: "Job not found" });
+        }
+
+        if (job.postedBy.toString() !== req.user.id) {
+            return res.status(403).json({ success: false, message: "Unauthorized" });
+        }
+
+        const updatedJob = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+        res.json({ success: true, message: "Job updated successfully", job: updatedJob });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+export const deleteJob = async (req, res) => {
+    try {
+        const job = await Job.findById(req.params.id);
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: "Job not found" });
+        }
+
+        if (job.postedBy.toString() !== req.user.id) {
+            return res.status(403).json({ success: false, message: "Unauthorized" });
+        }
+
+        await job.deleteOne();
+
+        res.json({ success: true, message: "Job deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
+
+export const getJobsEmployer = async (req, res) => {
+    try {
+        const jobs = await Job.find({ postedBy: req.user.id });
+        res.json({ success: true, jobs })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export const getAllJobs = async (req, res) => {
+    try {
+        const jobs = await Job.find({ status: "approved" }).populate("postedBy", "name email");
+        res.json({ success: true, jobs });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}
