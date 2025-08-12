@@ -51,7 +51,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 function Home() {
-    const userRole = "jobSeeker";
+    const userRole = "employer";
 
     const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
     const [jobFormDialogOpen, setJobFormDialogOpen] = useState(false);
