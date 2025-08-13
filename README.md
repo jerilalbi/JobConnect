@@ -50,11 +50,19 @@
 - View and download resumes
 
 ## Screenshots
-screenshots/login.jpeg
-screenshots/signup.jpeg
-screenshots/admin_dashboard.jpeg
-screenshots/job-seeker-dashboard.jpeg
-screenshots/employer_dashboard.jpeg
-screenshots/post_new_job.jpeg
-screenshots/view_applicants.jpeg
-screenshots/job_search.jpeg
+### Login Page
+![image](screenshots/login.jpeg)
+### Sign Up Page
+![image](screenshots/signup.jpeg)
+### Admin Dashboard Page
+![image](screenshots/admin_dashboard.jpeg)
+### Job Seeker Dashboard Page
+![image](screenshots/job-seeker-dashboard.jpeg)
+### Employer Dashboard Page
+![image](screenshots/employer_dashboard.jpeg)
+### Post New Job Sec
+![image](screenshots/post_new_job.jpeg)
+### View Applicants Sec
+![image](screenshots/view_applicants.jpeg)
+### Job Search Page
+![image](screenshots/job_search.jpeg)
