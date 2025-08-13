@@ -1,0 +1,128 @@
+[{
+  "_id": {
+    "$oid": "6899e5d14b6c08aa9989ec4f"
+  },
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "$2b$10$PH5qDMxelPAFpyE8KWL32OYvQBB4ilFtWmPZKnQ0WNwUutXMxiywm",
+  "role": "jobseeker",
+  "createdAt": {
+    "$date": "2025-08-11T12:45:05.865Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-11T12:45:05.865Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689ae54b72280fdbed835b70"
+  },
+  "name": "John CK",
+  "email": "john@lucidplus.com",
+  "password": "$2b$10$K/WLYVmA0Po3k2U32sgU4eBQyIGdc11xHFlblIgsO.OWZpM5n9.Km",
+  "role": "employer",
+  "createdAt": {
+    "$date": "2025-08-12T06:55:07.528Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-12T06:55:07.528Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689af6b9cddf03a22bd92df5"
+  },
+  "name": "Admin",
+  "email": "admin@lucidplus.com",
+  "password": "$2b$10$Xx7VRPQXgT0f/9VSF2HQ0eJMxsoZf5ND7TNGfU5R0cU7AphM0Rvy2",
+  "role": "admin",
+  "createdAt": {
+    "$date": "2025-08-12T08:09:29.234Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-12T08:09:29.234Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689b3afd1af1b8121df0f687"
+  },
+  "name": "Jeril Albi",
+  "email": "jerilalbi11@gmail.com",
+  "password": "$2b$10$4N3soSL9cbczltl8ZlPqIOBpVSAlGEshzSl3PWthm32VdeI29DL.i",
+  "role": "jobseeker",
+  "createdAt": {
+    "$date": "2025-08-12T13:00:45.693Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-12T13:00:45.693Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689b41051af1b8121df0f694"
+  },
+  "name": "Rahul CK",
+  "email": "rahul@lucidplus.com",
+  "password": "$2b$10$1qbOFEoBb6OBa8UspCu9fO/2JYRTe9BBCWM0aqBxwaqRshtr2bY6.",
+  "role": "employer",
+  "createdAt": {
+    "$date": "2025-08-12T13:26:29.527Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-12T13:26:29.527Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689c8e9b3b8d191ab8246559"
+  },
+  "name": "Alan CS",
+  "email": "alan@lucidplus.com",
+  "password": "$2b$10$rsdqWZSaNSyopD5HVtucgOttRIcDxOEmHZEaNBZTfyQ7iG/eAJQzO",
+  "role": "employer",
+  "createdAt": {
+    "$date": "2025-08-13T13:09:47.128Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T13:09:47.128Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689c90ef3b8d191ab824656f"
+  },
+  "name": "Thomas CK",
+  "email": "thomas@lucidplus.com",
+  "password": "$2b$10$334vTNS6/OkX3OJVufqMkuF7sRunGD3yga/5xOEBRxuIuzVl7y0ny",
+  "role": "employer",
+  "createdAt": {
+    "$date": "2025-08-13T13:19:43.866Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T13:19:43.866Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689c91d73b8d191ab824658f"
+  },
+  "name": "David ON",
+  "email": "david@gmail.com",
+  "password": "$2b$10$ZW5srxtx5QJn7jyIte/lbujiuKY2n4GjlUguKDjaOPTtVUhgUyswG",
+  "role": "jobseeker",
+  "createdAt": {
+    "$date": "2025-08-13T13:23:35.425Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T13:23:35.425Z"
+  },
+  "__v": 0
+}]

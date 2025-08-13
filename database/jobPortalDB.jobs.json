@@ -1,0 +1,148 @@
+[{
+  "_id": {
+    "$oid": "689aebd2a50de57c99527a69"
+  },
+  "title": "Frontend Developer",
+  "description": "Looking for React.js developer",
+  "location": "Remote",
+  "salary": "60000 - 80000",
+  "jobType": "Full-Time",
+  "expirationDate": {
+    "$date": "2025-09-01T00:00:00.000Z"
+  },
+  "postedBy": {
+    "$oid": "689ae54b72280fdbed835b70"
+  },
+  "status": "approved",
+  "createdAt": {
+    "$date": "2025-08-12T07:22:58.299Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T13:12:16.179Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689b56eb1af1b8121df0f70d"
+  },
+  "title": "data scientist",
+  "description": "find trends with machine learning",
+  "location": "Delhi",
+  "salary": "85000 - 95000",
+  "jobType": "Full-Time",
+  "expirationDate": {
+    "$date": "2025-08-24T00:00:00.000Z"
+  },
+  "postedBy": {
+    "$oid": "689b41051af1b8121df0f694"
+  },
+  "status": "approved",
+  "createdAt": {
+    "$date": "2025-08-12T14:59:55.864Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T05:49:38.826Z"
+  },
+  "__v": 0,
+  "company": "Zomato"
+},
+{
+  "_id": {
+    "$oid": "689c14f2e9e80eabac496f9b"
+  },
+  "title": "Frontend Developer",
+  "description": "Looking for React.js developer",
+  "location": "Remote",
+  "salary": "60000 - 80000",
+  "jobType": "Full-Time",
+  "expirationDate": {
+    "$date": "2025-09-01T00:00:00.000Z"
+  },
+  "postedBy": {
+    "$oid": "689ae54b72280fdbed835b70"
+  },
+  "status": "deactivated",
+  "createdAt": {
+    "$date": "2025-08-13T04:30:42.206Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T05:49:31.733Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689c1551b477564c8236abe1"
+  },
+  "title": "Frontend Developer",
+  "description": "Looking for React.js developer",
+  "location": "Remote",
+  "company": "Zomato",
+  "salary": "60000 - 80000",
+  "jobType": "Full-Time",
+  "expirationDate": {
+    "$date": "2025-09-01T00:00:00.000Z"
+  },
+  "postedBy": {
+    "$oid": "689ae54b72280fdbed835b70"
+  },
+  "status": "approved",
+  "createdAt": {
+    "$date": "2025-08-13T04:32:17.393Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T05:48:35.001Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689c1810b477564c8236abfd"
+  },
+  "title": "Full Stack Developer",
+  "description": "Experience in both frontend and backedn",
+  "location": "Kochi",
+  "company": "Centrric Innovations",
+  "salary": "15000 - 20000",
+  "jobType": "Full-Time",
+  "expirationDate": {
+    "$date": "2025-08-22T00:00:00.000Z"
+  },
+  "postedBy": {
+    "$oid": "689b41051af1b8121df0f694"
+  },
+  "status": "deactivated",
+  "createdAt": {
+    "$date": "2025-08-13T04:44:00.633Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T05:49:27.067Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "689c91563b8d191ab8246576"
+  },
+  "title": "MERN Developer",
+  "description": "Experienced in MERN Development",
+  "location": "Kochi",
+  "company": "Centrric Innovations",
+  "salary": "15000 - 25000",
+  "jobType": "Full-Time",
+  "expirationDate": {
+    "$date": "2025-08-22T00:00:00.000Z"
+  },
+  "postedBy": {
+    "$oid": "689c90ef3b8d191ab824656f"
+  },
+  "status": "approved",
+  "createdAt": {
+    "$date": "2025-08-13T13:21:26.075Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-13T13:23:03.089Z"
+  },
+  "__v": 0
+}]
