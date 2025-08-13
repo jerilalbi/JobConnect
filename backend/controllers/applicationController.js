@@ -32,17 +32,9 @@ export const submitApplication = async (req, res) => {
     }
 }
 
-export const downloadResume = async (req, res) => {
+export const showResume = async (req, res) => {
     try {
         const { jobId, applicationId } = req.params;
-
-        const job = await Job.findOne({ _id: jobId, postedBy: req.user.id });
-        if (!job) {
-            return res.status(403).json({
-                success: false,
-                message: "You are not authorized to view resumes for this job"
-            });
-        }
 
         const application = await Application.findById(applicationId).populate("applicant", "name");
         if (!application || !application.resume || !application.resume.data) {
@@ -52,13 +44,20 @@ export const downloadResume = async (req, res) => {
             });
         }
 
-        const applicantName = application.applicant?.name?.replace(/\s+/g, "_") || "applicant";
-        const jobTitle = job.title?.replace(/\s+/g, "_") || "job";
-        const fileName = `resume-${applicantName}-${jobTitle}`;
+        const job = await Job.findById(jobId);
+        const isJobPoster = job && job.postedBy.toString() === req.user.id;
+        const isJobApplicant = application.applicant._id.toString() === req.user.id;
+
+        if (!isJobPoster && !isJobApplicant) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to view this resume"
+            });
+        }
 
         res.set({
             "Content-Type": application.resume.contentType,
-            "Content-Disposition": `attachment; filename="${fileName}"`
+            "Content-Disposition": `inline"`
         });
 
         res.send(application.resume.data);
@@ -117,6 +116,25 @@ export const updateApplicationStatus = async (req, res) => {
         if (!application) return res.status(400).json({ success: false, message: 'Application not found' });
 
         res.json({ success: true, message: 'Application status updated', application })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
+    }
+}
+
+export const myApplications = async (req, res) => {
+    try {
+        const applications = await Application.find({ applicant: req.user.id }).populate('job', 'title company');
+        res.json({ success: true, applications })
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
+    }
+}
+
+export const myApplicationJobIds = async (req, res) => {
+    try {
+        const applications = await Application.find({ applicant: req.user.id }).select('job');
+        const jobIds = applications.map(app => app.job)
+        res.json({ success: true, jobIds })
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })
     }

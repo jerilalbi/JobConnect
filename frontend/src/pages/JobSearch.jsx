@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Container,
@@ -24,66 +24,12 @@ import JobCard from "../components/JobCard";
 import JobDetails from "../components/JobDetails";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { showApprovedJobs } from "../api/jobs";
+import { getAppliedJobs } from "../api/application";
 
 function JobSearch() {
     const userRole = localStorage.getItem("role");
-    const [jobs, setJobs] = useState([
-        {
-            id: 1,
-            title: "Frontend Developer",
-            company: "Tech Solutions Inc.",
-            location: "San Francisco, CA",
-            salary: "$80,000 - $120,000",
-            jobType: "Full-Time",
-            postedDate: "2023-06-15",
-            description:
-                "We are looking for an experienced Frontend Developer proficient in React.js to join our team.",
-        },
-        {
-            id: 2,
-            title: "Backend Engineer",
-            company: "Data Systems LLC",
-            location: "New York, NY",
-            salary: "$90,000 - $130,000",
-            jobType: "Full-Time",
-            postedDate: "2023-06-10",
-            description:
-                "Seeking a skilled Backend Engineer with experience in Node.js and database management.",
-        },
-        {
-            id: 3,
-            title: "UX Designer",
-            company: "Creative Minds Agency",
-            location: "Remote",
-            salary: "$70,000 - $100,000",
-            jobType: "Remote",
-            postedDate: "2023-06-12",
-            description:
-                "Join our creative team as a UX Designer to create intuitive and engaging user experiences.",
-        },
-        {
-            id: 4,
-            title: "DevOps Engineer",
-            company: "Cloud Solutions Co.",
-            location: "Austin, TX",
-            salary: "$95,000 - $140,000",
-            jobType: "Full-Time",
-            postedDate: "2023-06-08",
-            description:
-                "Looking for a DevOps Engineer to help streamline our deployment processes and infrastructure.",
-        },
-        {
-            id: 5,
-            title: "Content Writer",
-            company: "Media Publishing Group",
-            location: "Chicago, IL",
-            salary: "$50,000 - $70,000",
-            jobType: "Part-Time",
-            postedDate: "2023-06-14",
-            description:
-                "Seeking a talented Content Writer to create engaging articles and marketing materials.",
-        },
-    ]);
+    const [jobs, setJobs] = useState([]);
 
     const [filters, setFilters] = useState({
         keyword: "",
@@ -109,21 +55,10 @@ function JobSearch() {
     };
 
     const handleJobClick = (jobId) => {
-        const job = jobs.find((j) => j.id === parseInt(jobId));
+        const job = jobs.find((j) => j._id === jobId);
+        console.log(jobId)
         if (job) {
-            const jobWithDetails = {
-                ...job,
-                expirationDate: "2023-07-15",
-                requirements: [
-                    "Bachelor's degree in Computer Science or related field",
-                    "Strong problem-solving skills",
-                    "Excellent communication abilities",
-                    "Team collaboration experience",
-                    "Attention to detail",
-                ],
-                companyDescription: `${job.company} is a leading company in the industry, committed to innovation and excellence. We provide a collaborative work environment where talented individuals can grow and make a meaningful impact.`,
-            };
-            setSelectedJob(jobWithDetails);
+            setSelectedJob(job);
             setIsModalOpen(true);
         }
     };
@@ -148,7 +83,23 @@ function JobSearch() {
             filters.jobType === "all" ||
             job.jobType === filters.jobType;
 
-        return keywordMatch && locationMatch && jobTypeMatch;
+        let salaryMatch = true;
+        if (filters.salaryRange && filters.salaryRange !== "any") {
+            const [filterMin, filterMaxRaw] = filters.salaryRange.split("-");
+            const filterMinNum = parseInt(filterMin, 10);
+            const filterMaxNum =
+                filterMaxRaw && filterMaxRaw.includes("+")
+                    ? Infinity
+                    : parseInt(filterMaxRaw, 10);
+
+            const [jobMin, jobMax] = job.salary
+                .split("-")
+                .map((s) => parseInt(s.replace(/[^0-9]/g, ""), 10));
+
+            salaryMatch = jobMin >= filterMinNum && jobMax <= filterMaxNum;
+        }
+
+        return keywordMatch && locationMatch && jobTypeMatch && salaryMatch;
     });
 
     const sortedJobs = [...filteredJobs].sort((a, b) => {
@@ -174,6 +125,24 @@ function JobSearch() {
     const indexOfFirstJob = indexOfLastJob - jobsPerPage;
     const currentJobs = sortedJobs.slice(indexOfFirstJob, indexOfLastJob);
     const totalPages = Math.ceil(sortedJobs.length / jobsPerPage);
+    const [appliedJobs, setAppliedJobs] = useState([]);
+
+    useEffect(() => {
+        const getAllJobs = async () => {
+            const jobData = await showApprovedJobs();
+            setJobs(jobData.jobs)
+        }
+
+        getAllJobs();
+    }, [])
+
+    useEffect(() => {
+        const getMyAppliedJobs = async () => {
+            const jobIds = await getAppliedJobs();
+            setAppliedJobs(jobIds.jobIds);
+        }
+        getMyAppliedJobs();
+    }, [appliedJobs])
 
     return (
         <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
@@ -255,17 +224,12 @@ function JobSearch() {
                                         onChange={(e) =>
                                             handleFilterChange("salaryRange", e.target.value)
                                         }
-                                        startAdornment={
-                                            <InputAdornment position="start">
-                                                <AttachMoney />
-                                            </InputAdornment>
-                                        }
                                     >
                                         <MenuItem value="any">Any Salary</MenuItem>
-                                        <MenuItem value="0-50000">$0 - $50,000</MenuItem>
-                                        <MenuItem value="50000-80000">$50,000 - $80,000</MenuItem>
-                                        <MenuItem value="80000-100000">$80,000 - $100,000</MenuItem>
-                                        <MenuItem value="100000+">$100,000+</MenuItem>
+                                        <MenuItem value="0-50000">₹ 0 - ₹ 50,000</MenuItem>
+                                        <MenuItem value="50000-80000">₹ 50,000 - ₹ 80,000</MenuItem>
+                                        <MenuItem value="80000-100000">₹ 80,000 - ₹ 100,000</MenuItem>
+                                        <MenuItem value="100000+">₹ 100,000+</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -307,7 +271,7 @@ function JobSearch() {
                 <Box sx={{ "& > *": { mb: 2 } }}>
                     {currentJobs.length > 0 ? (
                         currentJobs.map((job) => (
-                            <JobCard key={job.id} {...job} onClick={handleJobClick} />
+                            <JobCard key={job._id} {...job} onClick={() => { handleJobClick(job._id) }} isApplied={appliedJobs.includes(job._id)} />
                         ))
                     ) : (
                         <Card sx={{ p: 4, textAlign: "center" }}>

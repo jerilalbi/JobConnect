@@ -6,7 +6,6 @@ import {
     Card,
     CardContent,
     CardHeader,
-    CardActions,
     Button,
     Avatar,
     Chip,
@@ -51,6 +50,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useEffect } from "react";
 import { createJob, deleteJob, editJob, showEmployerJobs } from "../api/jobs";
+import { changeJobStatus, getAllJobs } from "../api/admin";
+import { changeApplicantStatus, getMyApplications, showApplicants, viewResume } from "../api/application";
 
 function Home() {
     const userRole = localStorage.getItem("role");
@@ -59,7 +60,11 @@ function Home() {
     const [jobFormDialogOpen, setJobFormDialogOpen] = useState(false);
     const [applicantsDialogOpen, setApplicantsDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [coverLetterDialogOpen, setCoverLetterDialogOpen] = useState(false);
+    const [coverLetter, setCoverLetter] = useState('');
     const [selectedJob, setSelectedJob] = useState(null);
+    const [applicationDetails, setApplicationDetails] = useState({});
+    const [applicantsDetails, setApplicantsDetails] = useState([]);
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [editingJob, setEditingJob] = useState(null);
     const [tabValue, setTabValue] = useState(0);
@@ -68,81 +73,22 @@ function Home() {
         title: "",
         description: "",
         location: "",
+        company: "",
         salary: "",
         jobType: "Full-Time",
         expirationDate: "",
     });
 
-    const jobSeekerApplications = [
-        {
-            id: 1,
-            jobTitle: "Frontend Developer",
-            company: "Tech Solutions Inc.",
-            appliedDate: "2023-06-15",
-            status: "Pending",
-            resume: "John_Doe_Resume_Frontend.pdf",
-            coverLetter: "Passionate about creating user-friendly interfaces...",
-        },
-        {
-            id: 2,
-            jobTitle: "UX Designer",
-            company: "Creative Minds",
-            appliedDate: "2023-06-10",
-            status: "Interviewed",
-            resume: "John_Doe_Resume_UX.pdf",
-            coverLetter: "Experienced in user research and design thinking...",
-        },
-        {
-            id: 3,
-            jobTitle: "Product Manager",
-            company: "Innovate Corp",
-            appliedDate: "2023-06-05",
-            status: "Rejected",
-            resume: "John_Doe_Resume_PM.pdf",
-            coverLetter: "Strong background in product strategy...",
-        },
-        {
-            id: 4,
-            jobTitle: "Backend Developer",
-            company: "Data Systems",
-            appliedDate: "2023-06-01",
-            status: "Offered",
-            resume: "John_Doe_Resume_Backend.pdf",
-            coverLetter: "Expertise in scalable backend systems...",
-        },
-    ];
-
+    const [jobSeekerApplications, setJobSeekerApplications] = useState([]);
     const [employerJobs, setEmployerJobs] = useState([]);
-
     const [adminJobListings, setAdminJobListings] = useState([]);
 
-    const adminUsers = [
-        {
-            id: 1,
-            name: "John Doe",
-            email: "john@example.com",
-            role: "Job Seeker",
-            status: "Active",
-        },
-        {
-            id: 2,
-            name: "Jane Smith",
-            email: "jane@example.com",
-            role: "Employer",
-            status: "Active",
-        },
-        {
-            id: 3,
-            name: "Bob Johnson",
-            email: "bob@example.com",
-            role: "Job Seeker",
-            status: "Inactive",
-        },
-    ];
+    const handleViewResume = async (jobId, applicationId) => {
+        const file = await viewResume(jobId, applicationId);
+        const fileURL = URL.createObjectURL(file);
+        window.open(fileURL, "_blank");
 
-    const handleViewResume = (application) => {
-        setSelectedApplication(application);
-        setResumeDialogOpen(true);
+
     };
 
     const handleEditJob = (job) => {
@@ -151,6 +97,7 @@ function Home() {
             title: job.title,
             description: job.description,
             location: job.location,
+            company: job.company,
             salary: job.salary,
             jobType: job.jobType,
             expirationDate: new Date(job.expirationDate).toISOString().split('T')[0],
@@ -164,6 +111,7 @@ function Home() {
             title: "",
             description: "",
             location: "",
+            company: "",
             salary: "",
             jobType: "Full-Time",
             expirationDate: "",
@@ -171,8 +119,11 @@ function Home() {
         setJobFormDialogOpen(true);
     };
 
-    const handleViewApplicants = (job) => {
-        setSelectedJob(job);
+    const handleViewApplicants = async (job) => {
+        const jobApplicants = await showApplicants(job._id);
+        setApplicationDetails(jobApplicants);
+        setApplicantsDetails(jobApplicants.applicants);
+        console.log(applicantsDetails)
         setApplicantsDialogOpen(true);
     };
 
@@ -181,20 +132,32 @@ function Home() {
         setDeleteDialogOpen(true);
     };
 
-    const handleApproveJob = (jobId) => {
-        setAdminJobListings((prev) =>
-            prev.map((job) =>
-                job.id === jobId ? { ...job, status: "Active" } : job,
-            ),
-        );
+    const handleApproveJob = async (jobId) => {
+        const isStatusChanged = await changeJobStatus(jobId, 'approved');
+        if (isStatusChanged.success) {
+            setAdminJobListings((prev) =>
+                prev.map((job) =>
+                    job._id === jobId ? { ...job, status: "approved" } : job,
+                ),
+            );
+        }
     };
 
-    const handleRejectJob = (jobId) => {
-        setAdminJobListings((prev) =>
-            prev.map((job) =>
-                job.id === jobId ? { ...job, status: "Inactive" } : job,
-            ),
-        );
+    const updateApplicantStatus = async (status, jobId, applicationId) => {
+        await changeApplicantStatus(status, jobId, applicationId)
+        setApplicantsDetails((prev) => prev.map((applicant) => applicant._id === applicationId ? { ...applicant, status: status } : applicant))
+
+    }
+
+    const handleRejectJob = async (jobId) => {
+        const isStatusChanged = await changeJobStatus(jobId, 'deactivated');
+        if (isStatusChanged.success) {
+            setAdminJobListings((prev) =>
+                prev.map((job) =>
+                    job._id === jobId ? { ...job, status: "deactivated" } : job,
+                ),
+            );
+        }
     };
 
     const handleSaveJob = async () => {
@@ -209,7 +172,6 @@ function Home() {
             );
         } else {
             const newJob = await createJob(jobForm);
-            console.log(newJob.jobs)
             setEmployerJobs((prev) => [...prev, newJob.job]);
         }
         setJobFormDialogOpen(false);
@@ -227,19 +189,29 @@ function Home() {
 
     const getStatusColor = (status) => {
         switch (status.toLowerCase()) {
-            case "active":
-            case "offered":
+            case "shortlisted":
                 return "success";
-            case "pending":
-                return "warning";
-            case "interviewed":
-                return "info";
             case "rejected":
-            case "inactive":
                 return "error";
             default:
                 return "default";
         }
+    };
+
+    const getStatusColorAdmin = (status) => {
+        switch (status.toLowerCase()) {
+            case "approved":
+                return "success";
+            case "deactivated":
+                return "error";
+            default:
+                return "default";
+        }
+    }
+
+    const formatDate = (dateString) => {
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
     useEffect(() => {
@@ -249,8 +221,13 @@ function Home() {
         }
 
         const getAllJobsAdmin = async () => {
-            const employerJobData = await getAllJobsAdmin();
-            setAdminJobListings(employerJobData.jobs)
+            const allJobsAdminData = await getAllJobs();
+            setAdminJobListings(allJobsAdminData.jobs)
+        }
+
+        const getUserApplications = async () => {
+            const userApplications = await getMyApplications();
+            setJobSeekerApplications(userApplications.applications)
         }
 
         if (userRole === 'employer') {
@@ -258,6 +235,9 @@ function Home() {
         }
         if (userRole === 'admin') {
             getAllJobsAdmin();
+        }
+        if (userRole === 'jobseeker') {
+            getUserApplications();
         }
 
     }, [])
@@ -286,29 +266,14 @@ function Home() {
                             <Grid item xs={12} md={4}>
                                 <Card>
                                     <CardHeader
-                                        title="Interviews"
+                                        title="Shortlisted"
                                         subheader="Upcoming interviews"
                                     />
                                     <CardContent>
                                         <Typography variant="h3" fontWeight="bold">
                                             {
                                                 jobSeekerApplications.filter(
-                                                    (app) => app.status === "Interviewed",
-                                                ).length
-                                            }
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Card>
-                                    <CardHeader title="Offers" subheader="Job offers received" />
-                                    <CardContent>
-                                        <Typography variant="h3" fontWeight="bold">
-                                            {
-                                                jobSeekerApplications.filter(
-                                                    (app) => app.status === "Offered",
+                                                    (app) => app.status === "shortlisted",
                                                 ).length
                                             }
                                         </Typography>
@@ -338,10 +303,10 @@ function Home() {
                                             {jobSeekerApplications.map((application) => (
                                                 <TableRow key={application.id}>
                                                     <TableCell sx={{ fontWeight: 500 }}>
-                                                        {application.jobTitle}
+                                                        {application.job.title}
                                                     </TableCell>
-                                                    <TableCell>{application.company}</TableCell>
-                                                    <TableCell>{application.appliedDate}</TableCell>
+                                                    <TableCell>{application.job.company}</TableCell>
+                                                    <TableCell>{formatDate(application.createdAt)}</TableCell>
                                                     <TableCell>
                                                         <Chip
                                                             label={application.status}
@@ -354,7 +319,7 @@ function Home() {
                                                             variant="text"
                                                             size="small"
                                                             startIcon={<Visibility />}
-                                                            onClick={() => handleViewResume(application)}
+                                                            onClick={() => handleViewResume(application.job._id, application._id)}
                                                         >
                                                             View Resume
                                                         </Button>
@@ -365,11 +330,6 @@ function Home() {
                                     </Table>
                                 </TableContainer>
                             </CardContent>
-                            <CardActions>
-                                <Button variant="outlined" fullWidth>
-                                    View All Applications
-                                </Button>
-                            </CardActions>
                         </Card>
                     </Box>
                 )}
@@ -386,20 +346,6 @@ function Home() {
                                     <CardContent>
                                         <Typography variant="h3" fontWeight="bold">
                                             {employerJobs.filter((job) => job.status === 'approved').length}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Card>
-                                    <CardHeader
-                                        title="Expiring Soon"
-                                        subheader="Jobs expiring within 7 days"
-                                    />
-                                    <CardContent>
-                                        <Typography variant="h3" fontWeight="bold">
-                                            1
                                         </Typography>
                                     </CardContent>
                                 </Card>
@@ -426,6 +372,7 @@ function Home() {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Job Title</TableCell>
+                                                <TableCell>Company</TableCell>
                                                 <TableCell>Status</TableCell>
                                                 <TableCell>Expires</TableCell>
                                                 <TableCell>Actions</TableCell>
@@ -436,6 +383,9 @@ function Home() {
                                                 <TableRow key={job._id}>
                                                     <TableCell sx={{ fontWeight: 500 }}>
                                                         {job.title}
+                                                    </TableCell>
+                                                    <TableCell sx={{ fontWeight: 500 }}>
+                                                        {job.company || ''}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Chip
@@ -505,7 +455,7 @@ function Home() {
                                         <Typography variant="h3" fontWeight="bold">
                                             {
                                                 adminJobListings.filter(
-                                                    (job) => job.status === "Active",
+                                                    (job) => job.status === "approved",
                                                 ).length
                                             }
                                         </Typography>
@@ -523,23 +473,9 @@ function Home() {
                                         <Typography variant="h3" fontWeight="bold">
                                             {
                                                 adminJobListings.filter(
-                                                    (job) => job.status === "Pending",
+                                                    (job) => job.status === "pending",
                                                 ).length
                                             }
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            <Grid item xs={12} md={3}>
-                                <Card>
-                                    <CardHeader
-                                        title="Total Users"
-                                        subheader="Registered users"
-                                    />
-                                    <CardContent>
-                                        <Typography variant="h3" fontWeight="bold">
-                                            {adminUsers.length}
                                         </Typography>
                                     </CardContent>
                                 </Card>
@@ -572,16 +508,16 @@ function Home() {
                                                     </TableHead>
                                                     <TableBody>
                                                         {adminJobListings.map((job) => (
-                                                            <TableRow key={job.id}>
+                                                            <TableRow key={job._id}>
                                                                 <TableCell sx={{ fontWeight: 500 }}>
                                                                     {job.title}
                                                                 </TableCell>
-                                                                <TableCell>{job.company}</TableCell>
-                                                                <TableCell>{job.postedDate}</TableCell>
+                                                                <TableCell>{job.company || 'company'}</TableCell>
+                                                                <TableCell>{job.postedDate || 'date'}</TableCell>
                                                                 <TableCell>
                                                                     <Chip
                                                                         label={job.status}
-                                                                        color={getStatusColor(job.status)}
+                                                                        color={getStatusColorAdmin(job.status)}
                                                                         size="small"
                                                                     />
                                                                 </TableCell>
@@ -591,7 +527,7 @@ function Home() {
                                                                             size="small"
                                                                             color="success"
                                                                             onClick={() =>
-                                                                                handleApproveJob(job.id)
+                                                                                handleApproveJob(job._id)
                                                                             }
                                                                             title="Approve Job"
                                                                         >
@@ -601,7 +537,7 @@ function Home() {
                                                                             size="small"
                                                                             color="error"
                                                                             onClick={() =>
-                                                                                handleRejectJob(job.id)
+                                                                                handleRejectJob(job._id)
                                                                             }
                                                                             title="Deactivate Job"
                                                                         >
@@ -706,6 +642,15 @@ function Home() {
                             required
                         />
                         <TextField
+                            label="Company Name"
+                            value={jobForm.company}
+                            onChange={(e) =>
+                                setJobForm((prev) => ({ ...prev, company: e.target.value }))
+                            }
+                            fullWidth
+                            required
+                        />
+                        <TextField
                             label="Location"
                             value={jobForm.location}
                             onChange={(e) =>
@@ -769,43 +714,66 @@ function Home() {
                 maxWidth="md"
                 fullWidth
             >
-                <DialogTitle>Applicants for {selectedJob?.title}</DialogTitle>
+                <DialogTitle>Applicants for {applicationDetails?.jobTitle}</DialogTitle>
                 <DialogContent>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Total Applicants: {selectedJob?.applicants}
+                        Total Applicants: {applicationDetails?.totalApplicants}
                     </Typography>
                     <List>
-                        {selectedJob?.applicantsList?.map((applicant) => (
+                        {applicantsDetails?.map((applicant) => (
                             <ListItem key={applicant.id} divider>
                                 <ListItemAvatar>
                                     <Avatar
-                                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${applicant.name}`}
+                                        src={`https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80`}
                                     >
-                                        {applicant.name.charAt(0)}
+                                        {applicant.applicant.name}
                                     </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary={applicant.name}
+                                    primary={applicant.applicant.name}
                                     secondary={
                                         <Box>
-                                            <Typography variant="body2">{applicant.email}</Typography>
+                                            <Typography variant="body2">{applicant.applicant.email}</Typography>
                                             <Typography variant="caption" color="text.secondary">
-                                                Applied: {applicant.appliedDate}
+                                                Applied {formatDate(applicant.createdAt)}
                                             </Typography>
                                         </Box>
                                     }
                                 />
                                 <Box sx={{ display: "flex", gap: 1 }}>
                                     <Button
+                                        onClick={() => {
+                                            handleViewResume(applicant.job, applicant._id)
+                                        }}
                                         size="small"
                                         startIcon={<GetApp />}
                                         variant="outlined"
                                     >
                                         Resume
                                     </Button>
-                                    <Button size="small" variant="contained">
-                                        Contact
+                                    <Button onClick={() => { setCoverLetter(applicant.coverLetter); setCoverLetterDialogOpen(true) }} size="small" variant="contained">
+                                        Cover Letter
                                     </Button>
+                                    <FormControl>
+                                        <InputLabel
+                                            id="job-type-label"
+                                            sx={{ color: 'black' }}
+                                        >
+                                            Status
+                                        </InputLabel>
+                                        <Select
+                                            value={applicant.status}
+                                            onChange={(e) =>
+                                                updateApplicantStatus(e.target.value, applicant.job, applicant._id)
+                                            }
+                                            label="Status"
+                                        >
+                                            <MenuItem value="applied">Applied</MenuItem>
+                                            <MenuItem value="shortlisted">Short Listed</MenuItem>
+                                            <MenuItem value="rejected">Rejected</MenuItem>
+                                        </Select>
+                                    </FormControl>
+
                                 </Box>
                             </ListItem>
                         ))}
@@ -813,6 +781,21 @@ function Home() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setApplicantsDialogOpen(false)}>Close</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={coverLetterDialogOpen}
+                onClose={() => setCoverLetterDialogOpen(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>Cover Letter</DialogTitle>
+                <DialogContent>
+                    <Typography>{coverLetter}</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setCoverLetterDialogOpen(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
 

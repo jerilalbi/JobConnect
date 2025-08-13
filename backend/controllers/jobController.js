@@ -2,13 +2,14 @@ import Job from "../models/Jobs.js";
 
 export const createJob = async (req, res) => {
     try {
-        const { title, description, location, salary, jobType, expirationDate } = req.body;
+        const { title, description, location, salary, jobType, expirationDate, company } = req.body;
 
         const job = await Job.create({
             title,
             description,
             location,
             salary,
+            company,
             jobType,
             expirationDate,
             postedBy: req.user.id
@@ -92,11 +93,11 @@ export const getAllJobsAdmin = async (req, res) => {
     }
 }
 
-export const approveJob = async (req, res) => {
+export const changeJobStatus = async (req, res) => {
     try {
         const job = await Job.findByIdAndUpdate(
             req.params.jobId,
-            { status: "approved" },
+            { status: req.body.status },
             { new: true }
         );
 
@@ -104,25 +105,7 @@ export const approveJob = async (req, res) => {
             return res.status(404).json({ success: false, message: "Job not found" });
         }
 
-        res.json({ success: true, message: "Job approved", job });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-}
-
-export const disapproveJob = async (req, res) => {
-    try {
-        const job = await Job.findByIdAndUpdate(
-            req.params.jobId,
-            { status: "deactivated" },
-            { new: true }
-        );
-
-        if (!job) {
-            return res.status(404).json({ success: false, message: "Job not found" });
-        }
-
-        res.json({ success: true, message: "Job deactivated", job });
+        res.json({ success: true, message: "Job status changes", job });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

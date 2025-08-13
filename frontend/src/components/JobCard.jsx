@@ -13,19 +13,19 @@ import {
 import {
     CalendarToday,
     LocationOn,
-    AttachMoney,
 } from "@mui/icons-material";
 
 const JobCard = ({
-    id = "1",
+    _id = "1",
     title = "Software Engineer",
     company = "Tech Solutions Inc.",
-    location = "San Francisco, CA",
-    salary = "$80,000 - $120,000",
+    location = "Kochi, Kerala",
+    salary = "80000 - 90000",
     jobType = "Full-Time",
-    postedDate = "2023-06-15",
-    logo = "https://api.dicebear.com/7.x/avataaars/svg?seed=tech",
+    updatedAt = "2025-08-12",
+    logo = "https://d2jhcfgvzjqsa8.cloudfront.net/storage/2022/04/download.png",
     onClick = () => { },
+    isApplied
 }) => {
     const formatDate = (dateString) => {
         const options = { year: "numeric", month: "short", day: "numeric" };
@@ -103,10 +103,8 @@ const JobCard = ({
                             </Grid>
                             <Grid item xs={12} md={4}>
                                 <Box display="flex" alignItems="center">
-                                    <AttachMoney
-                                        sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }}
-                                    />
-                                    <Typography variant="body2" color="text.secondary">
+                                    ₹
+                                    <Typography pl={1} variant="body2" color="text.secondary">
                                         {salary}
                                     </Typography>
                                 </Box>
@@ -117,7 +115,7 @@ const JobCard = ({
                                         sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }}
                                     />
                                     <Typography variant="body2" color="text.secondary">
-                                        Posted {formatDate(postedDate)}
+                                        Posted {formatDate(updatedAt)}
                                     </Typography>
                                 </Box>
                             </Grid>
@@ -125,14 +123,26 @@ const JobCard = ({
                     </Box>
                 </Box>
             </CardContent>
+            {
+                isApplied ? (
+                    <CardActions
+                        sx={{ px: 3, py: 2, bgcolor: "grey.50", justifyContent: "flex-end" }}
+                    >
+                        <Button disabled={true} variant="contained">
+                            Submitted
+                        </Button>
+                    </CardActions>
+                ) : (
+                    <CardActions
+                        sx={{ px: 3, py: 2, bgcolor: "grey.50", justifyContent: "flex-end" }}
+                    >
+                        <Button variant="contained" onClick={() => onClick(_id)}>
+                            View Details
+                        </Button>
+                    </CardActions>
+                )
+            }
 
-            <CardActions
-                sx={{ px: 3, py: 2, bgcolor: "grey.50", justifyContent: "flex-end" }}
-            >
-                <Button variant="contained" onClick={() => onClick(id)}>
-                    View Details
-                </Button>
-            </CardActions>
         </Card>
     );
 };

@@ -9,6 +9,6 @@ const applicationSchema = new mongoose.Schema({
         contentType: String
     },
     status: { type: String, enum: ["applied", "shortlisted", "rejected"], default: "applied" }
-});
+}, { timestamps: true });
 
 export default mongoose.model("Application", applicationSchema);

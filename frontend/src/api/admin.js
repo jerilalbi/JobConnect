@@ -1,25 +1,29 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/job";
-const token = localStorage.getItem("token");
 
-export const approveJobStatus = async (jobId) => {
+export const changeJobStatus = async (jobId, status) => {
     try {
-        const res = await axios.post(`${API_URL}/${jobId}/disapprove`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
+        const token = localStorage.getItem("token");
+        const res = await axios.put(`${API_URL}/${jobId}/update-status`,
+            {
+                status: status
+            },
+            { headers: { 'Authorization': `Bearer ${token}` } })
         return res.data
     } catch (error) {
+        console.log(error.message)
         throw error
     }
 }
 
-export const disapproveJobStatus = async (jobId) => {
+export const getAllJobs = async () => {
     try {
-        const res = await axios.post(`${API_URL}/${jobId}/disapprove`, {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`${API_URL}/all-jobs`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-        return res.data
+        return res.data;
     } catch (error) {
         throw error
     }

@@ -16,7 +16,7 @@ function Header({ userRole, isSearch = false }) {
                 <Typography
                     variant="h5"
                     component="h1"
-                    onClick={() => { navigate('/') }}
+                    onClick={() => { navigate('/home') }}
                     sx={{ flexGrow: 1, fontWeight: "bold", cursor: 'pointer' }}
                 >
                     JobConnect

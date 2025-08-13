@@ -10,6 +10,7 @@ export const registerUser = async (req, res) => {
         const newUser = await User.create({ name, email, password, role });
 
         res.status(200).json({
+            status: true,
             _id: newUser._id,
             name: newUser.name,
             email: newUser.email,
@@ -17,7 +18,7 @@ export const registerUser = async (req, res) => {
             token: generateToken(newUser._id, newUser.role)
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ status: false, message: error.message });
     }
 }
 
@@ -27,6 +28,7 @@ export const loginUser = async (req, res) => {
         const loginUser = await User.findOne({ email });
         if (loginUser && (await loginUser.matchPassword(password))) {
             res.json({
+                status: true,
                 _id: loginUser._id,
                 name: loginUser.name,
                 email: loginUser.email,
@@ -34,7 +36,7 @@ export const loginUser = async (req, res) => {
                 token: generateToken(loginUser._id, loginUser.role)
             })
         } else {
-            res.status(401).json({ message: 'Invalid email or password' });
+            res.json({ status: false, message: 'Invalid email or password' });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });

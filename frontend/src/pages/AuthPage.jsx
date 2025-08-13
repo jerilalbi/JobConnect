@@ -35,25 +35,28 @@ function AuthPage() {
     const [success, setSuccess] = useState("");
 
     const handleLoginSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
+        try {
+            e.preventDefault();
+            setError("");
 
-        if (!loginForm.email || !loginForm.password) {
-            setError("Please fill in all fields");
-            return;
+            if (!loginForm.email || !loginForm.password) {
+                setError("Please fill in all fields");
+                return;
+            }
+
+            const res = await loginUser(loginForm);
+            if (res.status) {
+                localStorage.setItem("token", res.token);
+                localStorage.setItem("role", res.role);
+                localStorage.setItem("name", res.name);
+                navigate('/home');
+            } else {
+                setError('Invalid Email or Password')
+            }
+        } catch (error) {
+            console.log(error.message)
+            throw error
         }
-
-        const res = await loginUser(loginForm);
-        if (res) {
-            localStorage.setItem("token", res.token);
-            localStorage.setItem("role", res.role);
-            localStorage.setItem("name", res.name);
-            navigate('home');
-        } else {
-            setError('Invalid Email or Password')
-        }
-
-
     };
 
     const handleSignupSubmit = async (e) => {
@@ -77,7 +80,7 @@ function AuthPage() {
             }
 
             const result = await registerUser(signupForm);
-            if (result) {
+            if (result.status) {
                 setSuccess("Account created successfully! Please log in.");
                 setSignupForm({
                     name: "",

@@ -22,6 +22,7 @@ export const loginUser = async (formData) => {
             "email": formData.email,
             "password": formData.password
         });
+        console.log(`success ${res.data}`)
         return res.data;
     } catch (error) {
         throw error;

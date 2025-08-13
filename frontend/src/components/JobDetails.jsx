@@ -24,31 +24,12 @@ import {
     Business,
     CloudUpload,
 } from "@mui/icons-material";
+import { applyJob } from "../api/application";
 
 function JobDetails({
     isOpen = true,
     onClose = () => { },
-    job = {
-        id: "1",
-        title: "Senior Frontend Developer",
-        company: "Tech Innovations Inc.",
-        location: "San Francisco, CA",
-        salary: "$120,000 - $150,000",
-        jobType: "Full-Time",
-        postedDate: "2023-06-15",
-        expirationDate: "2023-07-15",
-        description:
-            "We are looking for an experienced Frontend Developer to join our team. The ideal candidate should have strong experience with React, TypeScript, and modern frontend frameworks.",
-        requirements: [
-            "5+ years of experience in frontend development",
-            "Strong proficiency in React and TypeScript",
-            "Experience with state management libraries (Redux, Context API)",
-            "Knowledge of responsive design and cross-browser compatibility",
-            "Excellent problem-solving skills",
-        ],
-        companyDescription:
-            "Tech Innovations Inc. is a leading software development company specializing in creating cutting-edge web applications for enterprise clients.",
-    },
+    job
 }) {
     const [file, setFile] = useState(null);
     const [coverLetter, setCoverLetter] = useState("");
@@ -61,14 +42,16 @@ function JobDetails({
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-
-        setTimeout(() => {
-            setIsSubmitting(false);
-            setApplicationSubmitted(true);
-        }, 1500);
+        const isApplied = await applyJob(job._id, file, coverLetter)
+        if (isApplied.success) {
+            setTimeout(() => {
+                setIsSubmitting(false);
+                setApplicationSubmitted(true);
+            }, 1500);
+        }
     };
 
     const formatDate = (dateString) => {
@@ -136,7 +119,7 @@ function JobDetails({
                             sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                            Posted: {formatDate(job.postedDate)}
+                            Posted: {formatDate(job.updatedAt)}
                         </Typography>
                     </Box>
                     <Box display="flex" alignItems="center">
@@ -158,33 +141,6 @@ function JobDetails({
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                             {job.description}
-                        </Typography>
-                    </Box>
-
-                    <Box>
-                        <Typography variant="h6" fontWeight="600" gutterBottom>
-                            Requirements
-                        </Typography>
-                        <Box component="ul" sx={{ pl: 2, "& li": { mb: 0.5 } }}>
-                            {job.requirements.map((requirement, index) => (
-                                <Typography
-                                    component="li"
-                                    key={index}
-                                    variant="body2"
-                                    color="text.secondary"
-                                >
-                                    {requirement}
-                                </Typography>
-                            ))}
-                        </Box>
-                    </Box>
-
-                    <Box>
-                        <Typography variant="h6" fontWeight="600" gutterBottom>
-                            About the Company
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {job.companyDescription}
                         </Typography>
                     </Box>
                 </Box>
