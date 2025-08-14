@@ -243,9 +243,9 @@ function Home() {
     }, [])
 
     return (
-        <Box sx={{ minHeight: "100vh", bgcolor: "grey.50" }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", display: 'flex', flexDirection: 'column' }}>
             <Header userRole={userRole} />
-            <Container maxWidth="xl" sx={{ mt: 2 }}>
+            <Container maxWidth="xl" sx={{ mt: 2, flexGrow: 1 }}>
                 {userRole === "jobseeker" && (
                     <Box>
                         <Grid container spacing={3} sx={{ mb: 3 }}>
